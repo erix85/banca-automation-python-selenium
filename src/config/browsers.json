@@ -1,0 +1,30 @@
+{
+  "chrome": {
+    "browserName": "chrome",
+    "platformName": "Windows",
+    "browserVersion": "137.0.7151.69",
+    "acceptInsecureCerts": true,
+    "goog:chromeOptions": {
+      "args": ["--start-maximized"]
+    }
+  },
+  "firefox": {
+    "browserName": "firefox",
+    "platformName": "Windows",
+    "browserVersion": "latest",
+    "acceptInsecureCerts": true,
+    "moz:firefoxOptions": {
+      "args": ["-private"]
+    }
+  },
+  "edge": {
+    "browserName": "MicrosoftEdge",
+    "platformName": "Windows",
+    "browserVersion": "latest",
+    "acceptInsecureCerts": true,
+    "ms:edgeOptions": {
+      "args": ["--start-maximized", "--inprivate"]
+    }
+  }
+}
+

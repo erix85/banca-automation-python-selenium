@@ -1,0 +1,8 @@
+[flake8]
+max-line-length = 120
+max-complexity = 10
+count = True
+statistics = True
+show-source = True
+# Excluir carpetas comunes que no requieren analisis
+exclude = .git,__pycache__,venv,.env,allure-report,allure-results

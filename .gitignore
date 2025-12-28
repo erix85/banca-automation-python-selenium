@@ -1,0 +1,24 @@
+# Entornos virtuales
+env/
+venv/
+.env
+.venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+
+# Logs y Reportes (se generan al ejecutar, no se guardan)
+*.log
+reports/
+allure-results/
+allure-report/
+screenshots/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
