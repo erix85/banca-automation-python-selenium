@@ -1,0 +1,50 @@
+name: Banca Automation CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run Behave Tests
+      env:
+        HEADLESS: "true"
+      run: |
+        mkdir -p reports/logs
+        mkdir -p reports/screenshots
+        mkdir -p allure-results
+        # Ejecuta behave y genera resultados para Allure
+        behave -f allure_behave.formatter:AllureFormatter -o allure-results ./features
+
+    - name: Upload Allure Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-results
+        path: allure-results
+
+    - name: Upload Logs and Screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-artifacts
+        path: reports/
