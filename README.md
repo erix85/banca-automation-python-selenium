@@ -1,4 +1,4 @@
-# Banca Automation Framework (VIBE)
+# Automatizacin Web Selenium Behave
 
 Este proyecto es un framework de automatización de pruebas End-to-End (E2E) robusto y escalable, construido con **Python**, **Selenium WebDriver** y **Behave** (BDD).
 
