@@ -39,7 +39,7 @@ from selenium.common.exceptions import WebDriverException, SessionNotCreatedExce
 # Importaciones de tu proyecto
 
 from src.utils.logger import get_logger
-from src.definitions import PROJECT_ROOT
+from src.utils.definitions import PROJECT_ROOT
 
 from src.config.grid_manager import GridManager
 
@@ -296,7 +296,32 @@ class WebDriverFactory:
 
             if browser_name in drivers_map:
                 service_cls, manager_inst, driver_cls = drivers_map[browser_name]
-                service = service_cls(manager_inst.install())
+                
+                # Instalar y obtener ruta del driver
+                driver_path = manager_inst.install()
+
+                # --- FIX ROBUSTEZ WINDOWS (WinError 193) ---
+                # A veces webdriver_manager devuelve rutas a archivos no ejecutables (ej. LICENSE) 
+                # debido a cambios en la estructura de los zips de Google/Mozilla.
+                if platform.system() == "Windows":
+                    path_obj = Path(driver_path)
+                    
+                    # Si el path no termina en .exe, buscamos el ejecutable real en el directorio
+                    if not str(path_obj).lower().endswith(".exe"):
+                        _webdriver_factory_logger.warning(
+                            f"WDM devolvió un path no ejecutable: {driver_path}. Buscando el .exe correcto..."
+                        )
+                        # Definir directorio de búsqueda (si es archivo, usar su padre)
+                        search_dir = path_obj.parent if path_obj.is_file() else path_obj
+                        
+                        # Buscar cualquier .exe (generalmente solo hay uno: el driver)
+                        found_exe = next(search_dir.rglob("*.exe"), None)
+                        
+                        if found_exe:
+                            driver_path = str(found_exe)
+                            _webdriver_factory_logger.info(f"Path del driver corregido a: {driver_path}")
+
+                service = service_cls(executable_path=driver_path)
                 driver = driver_cls(service=service, options=options_obj)
                 
                 _webdriver_factory_logger.info(
@@ -327,6 +352,10 @@ class WebDriverFactory:
         # 1. Intentar Selenium Grid
         if self.grid_manager.is_grid_active():
             driver = self._create_remote_driver(browser_name, options_obj)
+            
+            if not driver:
+                 _webdriver_factory_logger.error("Grid activo en config pero falló la conexión. Abortando para no usar driver local accidentalmente.")
+                 raise Exception("Fallo crítico: Selenium Grid no disponible.")
         
         # 2. Si no hay driver aún (Grid inactivo o falló), intentar Driver Manual
         if not driver and use_manual_drivers:
@@ -336,7 +365,7 @@ class WebDriverFactory:
                 _webdriver_factory_logger.warning(
                     f"Fallo al inicializar driver manual para {browser_name}: {e}. Intentando fallback a WebDriverManager."
                 )
-
+        
         # 3. Fallback final: WebDriverManager
         if not driver:
             driver = self._create_manager_driver(browser_name, options_obj)

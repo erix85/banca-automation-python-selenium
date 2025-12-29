@@ -3,7 +3,7 @@ from configparser import ConfigParser, NoSectionError, NoOptionError
 from typing import Optional, Dict, Any
 
 from src.utils.logger import get_logger
-from src.definitions import PROJECT_ROOT
+from src.utils.definitions import PROJECT_ROOT
 
 
 class ConfigReader:
@@ -116,9 +116,13 @@ class ConfigReader:
         Retorna un diccionario con todas las configuraciones para un entorno dado.
         Maneja valores por defecto si no se encuentran en el archivo INI.
         """
-        if not self.config.has_section(environment_name):
-            self.logger.warning(f"Sección '{environment_name}' no encontrada en environments.ini. Usando valores por defecto o vacíos.")
-            return {}
+        # Mapear 'default' a la sección 'DEFAULT' de ConfigParser
+        section_to_read = environment_name
+        if environment_name.lower() == 'default':
+            section_to_read = 'DEFAULT'
+
+        if section_to_read != 'DEFAULT' and not self.config.has_section(section_to_read):
+            self.logger.warning(f"Sección '{section_to_read}' no encontrada en environments.ini. Usando valores por defecto del esquema.")
 
         # Definición del esquema de configuración: (clave, método_de_lectura, valor_por_defecto)
         # Nota: Los valores por defecto aquí actúan como respaldo final si fallan el INI y la sección DEFAULT.
@@ -129,7 +133,7 @@ class ConfigReader:
             'implicit_wait': (self.get_int_setting, 0),
             'screenshot_on_fail': (self.get_boolean_setting, True),
             'api_timeout': (self.get_int_setting, 30),
-            'base_url': (self.get_setting, 'http://localhost'),
+            'base_url': (self.get_setting, 'https://www.saucedemo.com'),
             'api_base_url': (self.get_setting, 'http://localhost:5000/api'),
             'grid_active': (self.get_boolean_setting, False),
             'grid_hub_url': (self.get_setting, 'http://localhost:4444/wd/hub'),
@@ -139,6 +143,6 @@ class ConfigReader:
 
         config_data = {}
         for key, (method, default_val) in config_schema.items():
-            config_data[key] = method(environment_name, key, default_val)
+            config_data[key] = method(section_to_read, key, default_val)
             
         return config_data
