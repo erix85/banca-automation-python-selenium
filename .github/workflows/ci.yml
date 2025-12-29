@@ -36,14 +36,14 @@ jobs:
         behave -f allure_behave.formatter:AllureFormatter -o allure-results ./features
 
     - name: Upload Allure Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: allure-results
         path: allure-results
 
     - name: Upload Logs and Screenshots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-artifacts
