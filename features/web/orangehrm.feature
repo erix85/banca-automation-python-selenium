@@ -29,5 +29,3 @@ Feature: Gestión de Empleados (PIM) en OrangeHRM
     When inicio sesión con el usuario "juan.perez.qa" y clave "NewPass456!"
     And cierro la sesión actual
 
-
-
